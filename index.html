@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Carta 3D Holográfica</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:#050509;
+  color:white;
+  font-family:Arial,sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+h1{
+  margin:0 0 8px;
+  font-size:32px;
+}
+
+p{
+  margin:0 0 20px;
+  color:#aaa;
+}
+
+.scene{
+  width:300px;
+  height:430px;
+  perspective:1200px;
+}
+
+.card{
+  width:100%;
+  height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .08s linear;
+  cursor:grab;
+}
+
+.face{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:18px;
+  overflow:hidden;
+  border:2px solid white;
+  backface-visibility:hidden;
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.7),
+    inset 0 0 20px rgba(255,255,255,.3);
+}
+
+.front{
+  background:#151515;
+}
+
+.back{
+  background:#151515;
+  transform:rotateY(180deg);
+}
+
+.art{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.holo{
+  position:absolute;
+  inset:-50%;
+  pointer-events:none;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 25%,
+      rgba(255,0,180,.45) 35%,
+      rgba(0,220,255,.6) 45%,
+      rgba(255,255,0,.5) 55%,
+      rgba(180,0,255,.5) 65%,
+      transparent 75%
+    );
+  mix-blend-mode:screen;
+  animation:brillo 3s linear infinite;
+}
+
+.holo2{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      120deg,
+      rgba(255,0,150,.15) 0px,
+      rgba(0,220,255,.15) 8px,
+      rgba(255,255,0,.15) 16px,
+      transparent 25px
+    );
+  mix-blend-mode:screen;
+}
+
+@keyframes brillo{
+  from{
+    transform:translateX(-45%) rotate(8deg);
+  }
+  to{
+    transform:translateX(45%) rotate(8deg);
+  }
+}
+
+.controles{
+  margin-top:25px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+button,
+label{
+  background:#181820;
+  color:white;
+  border:1px solid #555;
+  border-radius:10px;
+  padding:12px 16px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover,
+label:hover{
+  background:#292936;
+}
+
+input{
+  display:none;
+}
+
+.info{
+  margin-top:15px;
+  color:#777;
+  font-size:13px;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🃏 Carta 3D</h1>
+<p>Girá la carta y disfrutá el efecto holográfico</p>
+
+<div class="scene">
+
+  <div class="card" id="card">
+
+    <div class="face front">
+      <img id="imagen" class="art"
+      src="https://cdn.openart.ai/openart-uploads/production/2026-09/create-image/KnFVNp1YInaf7WsiJlgV/126430_1789042170712_7f6a95ba.png">
+      <div class="holo"></div>
+      <div class="holo2"></div>
+    </div>
+
+    <div class="face back">
+      <img class="art"
+      src="https://cdn.openart.ai/openart-uploads/production/2026-09/create-image/KnFVNp1YInaf7WsiJlgV/126430_1789042170712_7f6a95ba.png">
+      <div class="holo"></div>
+      <div class="holo2"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="controles">
+
+  <label for="archivo">
+    📷 Subir carta
+  </label>
+
+  <input id="archivo" type="file" accept="image/*">
+
+  <button onclick="giroAutomatico()">
+    🔄 Giro automático
+  </button>
+
+  <button onclick="reiniciar()">
+    ↩️ Reiniciar
+  </button>
+
+</div>
+
+<div class="info">
+Arrastrá la carta con el dedo o mouse para girarla.
+</div>
+
+<script>
+
+const card = document.getElementById("card");
+const archivo = document.getElementById("archivo");
+
+let rotX = 0;
+let rotY = 0;
+
+let moviendo = false;
+let ultimoX = 0;
+let ultimoY = 0;
+
+let automatico = false;
+
+function actualizar(){
+
+  card.style.transform =
+    "rotateX(" + rotX + "deg) rotateY(" + rotY + "deg)";
+
+}
+
+card.addEventListener("pointerdown",function(e){
+
+  moviendo = true;
+
+  ultimoX = e.clientX;
+  ultimoY = e.clientY;
+
+});
+
+card.addEventListener("pointermove",function(e){
+
+  if(!moviendo) return;
+
+  let dx = e.clientX - ultimoX;
+  let dy = e.clientY - ultimoY;
+
+  rotY += dx * 0.7;
+  rotX -= dy * 0.7;
+
+  rotX = Math.max(-60,Math.min(60,rotX));
+
+  ultimoX = e.clientX;
+  ultimoY = e.clientY;
+
+  actualizar();
+
+});
+
+card.addEventListener("pointerup",function(){
+
+  moviendo = false;
+
+});
+
+card.addEventListener("pointercancel",function(){
+
+  moviendo = false;
+
+});
+
+function giroAutomatico(){
+
+  automatico = !automatico;
+
+  if(automatico){
+
+    girar();
+
+  }
+
+}
+
+function girar(){
+
+  if(!automatico) return;
+
+  rotY += 0.8;
+
+  actualizar();
+
+  requestAnimationFrame(girar);
+
+}
+
+function reiniciar(){
+
+  automatico = false;
+
+  rotX = 0;
+  rotY = 0;
+
+  actualizar();
+
+}
+
+archivo.addEventListener("change",function(){
+
+  const file = archivo.files[0];
+
+  if(!file) return;
+
+  const imagen =
+    URL.createObjectURL(file);
+
+  document.getElementById("imagen").src = imagen;
+
+  document.querySelector(".back .art").src = imagen;
+
+});
+
+</script>
+
+</body>
+  </html>
